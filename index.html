@@ -28,12 +28,12 @@
         /* Menus */
         .screen {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.9); display: flex; flex-direction: column;
+            background: rgba(0,0,0,0.8); display: flex; flex-direction: column;
             align-items: center; justify-content: center; z-index: 40; transition: opacity 0.5s;
         }
         .hidden { opacity: 0; pointer-events: none; }
         h1 { font-size: 64px; color: var(--ui-red); text-shadow: 6px 6px 0px #fff; margin-bottom: 20px; font-style: italic; text-align: center; line-height: 1.2;}
-        h2 { font-size: 20px; color: var(--ui-color); margin-bottom: 40px; }
+        h2 { font-size: 20px; color: var(--ui-color); margin-bottom: 40px; text-shadow: 2px 2px 0 #000;}
         
         .car-grid { display: flex; gap: 30px; }
         .car-card {
@@ -55,7 +55,7 @@
         }
         .btn:hover { background: #fff; color: var(--ui-red); border-color: var(--ui-red); }
 
-        .instructions { position: absolute; bottom: 20px; text-align: center; font-size: 12px; color: #888; width: 100%; line-height: 1.8; z-index: 45;}
+        .instructions { position: absolute; bottom: 20px; text-align: center; font-size: 12px; color: #fff; text-shadow: 1px 1px 0 #000; width: 100%; line-height: 1.8; z-index: 45;}
         .highlight { color: var(--ui-color); }
     </style>
 </head>
@@ -74,25 +74,22 @@
                 <div class="car-color-box" style="background: #E30000;"></div>
                 <div class="car-name">CANNIBAL</div>
                 <div class="stat-row">TOP SPEED<div class="stat-bar"><div class="stat-fill" style="width: 90%;"></div></div></div>
-                <div class="stat-row">ACCELERATION<div class="stat-bar"><div class="stat-fill" style="width: 50%;"></div></div></div>
-                <div class="stat-row">TIRE GRIP<div class="stat-bar"><div class="stat-fill" style="width: 60%;"></div></div></div>
-                <div class="stat-row">FUEL ECON<div class="stat-bar"><div class="stat-fill" style="width: 40%; background: #f00;"></div></div></div>
+                <div class="stat-row">ACCEL<div class="stat-bar"><div class="stat-fill" style="width: 50%;"></div></div></div>
+                <div class="stat-row">GRIP<div class="stat-bar"><div class="stat-fill" style="width: 60%;"></div></div></div>
             </div>
             <div class="car-card" onclick="selectCar(1)">
                 <div class="car-color-box" style="background: #FFFFFF;"></div>
                 <div class="car-name">SIDEWINDER</div>
                 <div class="stat-row">TOP SPEED<div class="stat-bar"><div class="stat-fill" style="width: 65%;"></div></div></div>
-                <div class="stat-row">ACCELERATION<div class="stat-bar"><div class="stat-fill" style="width: 85%;"></div></div></div>
-                <div class="stat-row">TIRE GRIP<div class="stat-bar"><div class="stat-fill" style="width: 80%;"></div></div></div>
-                <div class="stat-row">FUEL ECON<div class="stat-bar"><div class="stat-fill" style="width: 90%; background: #0f0;"></div></div></div>
+                <div class="stat-row">ACCEL<div class="stat-bar"><div class="stat-fill" style="width: 85%;"></div></div></div>
+                <div class="stat-row">GRIP<div class="stat-bar"><div class="stat-fill" style="width: 80%;"></div></div></div>
             </div>
             <div class="car-card" onclick="selectCar(2)">
                 <div class="car-color-box" style="background: #1E88E5;"></div>
                 <div class="car-name">WEASEL</div>
                 <div class="stat-row">TOP SPEED<div class="stat-bar"><div class="stat-fill" style="width: 75%;"></div></div></div>
-                <div class="stat-row">ACCELERATION<div class="stat-bar"><div class="stat-fill" style="width: 70%;"></div></div></div>
-                <div class="stat-row">TIRE GRIP<div class="stat-bar"><div class="stat-fill" style="width: 95%;"></div></div></div>
-                <div class="stat-row">FUEL ECON<div class="stat-bar"><div class="stat-fill" style="width: 60%;"></div></div></div>
+                <div class="stat-row">ACCEL<div class="stat-bar"><div class="stat-fill" style="width: 70%;"></div></div></div>
+                <div class="stat-row">GRIP<div class="stat-bar"><div class="stat-fill" style="width: 95%;"></div></div></div>
             </div>
         </div>
         <button class="btn" onclick="startGame()">START RACE</button>
@@ -107,38 +104,28 @@
     </div>
 
     <div class="instructions" id="inst">
-        <span class="highlight">[ ARROWS ]</span> STEER / ACCEL / BRAKE &nbsp;&nbsp;|&nbsp;&nbsp; <span class="highlight">[ C ]</span> NITRO BOOST (x3)
+        <span class="highlight">[ SETAS ]</span> MOVER / ACELERAR / FREAR &nbsp;&nbsp;|&nbsp;&nbsp; <span class="highlight">[ C ]</span> NITRO BOOST (x3)
     </div>
 </div>
 
 <script>
-/**
- * TOP GEAR ULTIMATE - HTML5 ENGINE
- * Baseado na matemática de projeção pseudo-3D de "Lou's Pseudo 3d Page".
- * Codificado em arquivo único para portabilidade.
- */
-
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 const W = canvas.width;
 const H = canvas.height;
 
-// --- CONFIGURAÇÕES DE MOTOR E FÍSICA ---
+// --- CONFIGURAÇÕES BÁSICAS ---
 const FPS = 60;
-const STEP = 1/FPS;
 const SEGMENTS_VISIBLE = 300; 
 const SEGMENT_LENGTH = 200;
 const ROAD_WIDTH = 2200;
-const LANES = 3;
 
-// Câmera
+// Câmera do motor Pseudo-3D
 let cameraHeight = 1000;
 let cameraDepth = 1.0; 
-let playerZ = cameraHeight * cameraDepth; 
-let fieldOfView = 100;
 
 // Estado do Jogo
-let gameState = 'menu'; // menu, racing, finished
+let gameState = 'menu'; 
 let track = [];
 let trackLength = 0;
 let skyOffset = 0;
@@ -162,36 +149,27 @@ function selectCar(index) {
         c.style.borderColor = i === index ? '#0f0' : '#444';
     });
 }
+selectCar(0);
 
-// O Jogador
+// Status do Jogador
 let player = {
-    x: 0,           // Posição horizontal (-1 a 1)
-    y: 0,           // Altura
-    z: 0,           // Progresso na pista
-    speed: 0,       // Velocidade atual
-    speedPercent: 0,// speed / maxSpeed
-    rpm: 0,
-    gear: 1,
-    fuel: 100,
-    nitros: 3,
-    nitroActive: false,
-    nitroTimer: 0,
-    rank: 1,
-    steerAngle: 0   // Animação de curva
+    x: 0, y: 0, z: 0, 
+    speed: 0, speedPercent: 0,
+    rpm: 1000, gear: 1, fuel: 100, nitros: 3, nitroActive: false, nitroTimer: 0,
+    rank: 1, steerAngle: 0
 };
 
 // Controles
 const keys = { ArrowUp: false, ArrowDown: false, ArrowLeft: false, ArrowRight: false, c: false };
 window.addEventListener('keydown', e => { 
     if(keys.hasOwnProperty(e.key)) keys[e.key] = true; 
-    if(e.key.toLowerCase() === 'c' && !keys.c) activateNitro(); // Trigger nitro on press
+    if(e.key.toLowerCase() === 'c' && !keys.c) activateNitro(); 
 });
 window.addEventListener('keyup', e => { 
     if(keys.hasOwnProperty(e.key)) keys[e.key] = false; 
     if(e.key.toLowerCase() === 'c') keys.c = false;
 });
 
-// --- FUNÇÕES DE AJUDA ---
 const Util = {
     accelerate: (v, accel, dt) => v + (accel * dt),
     limit: (value, min, max) => Math.max(min, Math.min(value, max)),
@@ -205,18 +183,23 @@ const Util = {
     }
 };
 
-// --- MUNDO E PISTA (TRACK BUILDER) ---
-// Parâmetros de Pista
-const ROAD = { LENGTH: { NONE: 0, SHORT: 25, MEDIUM: 50, LONG: 100 }, CURVE: { NONE: 0, EASY: 2, MEDIUM: 4, HARD: 6 }, HILL: { NONE: 0, LOW: 20, MEDIUM: 40, HIGH: 60 } };
+// --- GERAÇÃO DA PISTA (Com colinas corrigidas) ---
+const ROAD = { 
+    LENGTH: { NONE: 0, SHORT: 25, MEDIUM: 50, LONG: 100 }, 
+    CURVE: { NONE: 0, EASY: 2, MEDIUM: 4, HARD: 6 }, 
+    HILL: { NONE: 0, LOW: 20, MEDIUM: 40, HIGH: 60 } 
+};
 
 function addSegment(curve, y) {
     let n = track.length;
+    // O pulo do gato pra pista não ficar "plana": Ligar o eixo Y corretamente no Mundo
+    let p1y = n === 0 ? 0 : track[n - 1].p2y;
     track.push({
         index: n,
-        p1: { world: { z: n * SEGMENT_LENGTH }, camera: {}, screen: {} },
-        p2: { world: { z: (n + 1) * SEGMENT_LENGTH }, camera: {}, screen: {} },
+        p1: { world: { x: 0, y: p1y, z: n * SEGMENT_LENGTH }, camera: {}, screen: {} },
+        p2: { world: { x: 0, y: y, z: (n + 1) * SEGMENT_LENGTH }, camera: {}, screen: {} },
         curve: curve,
-        p1y: track.length === 0 ? 0 : track[track.length - 1].p2y,
+        p1y: p1y,
         p2y: y,
         sprites: [],
         bots: [],
@@ -233,40 +216,25 @@ function addRoad(enter, hold, leave, curve, y) {
     for(let n = 0; n < leave; n++) addSegment(Util.interpolate(curve, 0, n/leave), Util.interpolate(startY, endY, (enter+hold+n)/total));
 }
 
-function addStraight(n) { addRoad(n, n, n, 0, 0); }
-function addCurve(n, curve, height) { addRoad(n, n, n, curve, height); }
-function addSCurves() {
+function generateTrack() {
+    track = [];
+    addRoad(ROAD.LENGTH.SHORT, ROAD.LENGTH.SHORT, ROAD.LENGTH.SHORT, 0, 0);
+    addRoad(ROAD.LENGTH.MEDIUM, ROAD.LENGTH.MEDIUM, ROAD.LENGTH.MEDIUM, ROAD.CURVE.EASY, ROAD.HILL.LOW);
+    // S-Curves
     addRoad(ROAD.LENGTH.MEDIUM, ROAD.LENGTH.MEDIUM, ROAD.LENGTH.MEDIUM, -ROAD.CURVE.EASY, ROAD.HILL.NONE);
     addRoad(ROAD.LENGTH.MEDIUM, ROAD.LENGTH.MEDIUM, ROAD.LENGTH.MEDIUM, ROAD.CURVE.MEDIUM, ROAD.HILL.MEDIUM);
     addRoad(ROAD.LENGTH.MEDIUM, ROAD.LENGTH.MEDIUM, ROAD.LENGTH.MEDIUM, ROAD.CURVE.EASY, -ROAD.HILL.LOW);
-    addRoad(ROAD.LENGTH.MEDIUM, ROAD.LENGTH.MEDIUM, ROAD.LENGTH.MEDIUM, -ROAD.CURVE.EASY, ROAD.HILL.MEDIUM);
-    addRoad(ROAD.LENGTH.MEDIUM, ROAD.LENGTH.MEDIUM, ROAD.LENGTH.MEDIUM, -ROAD.CURVE.MEDIUM, -ROAD.HILL.MEDIUM);
-}
-function addBumps() {
-    addRoad(10, 10, 10, 0, 5); addRoad(10, 10, 10, 0, -2);
-    addRoad(10, 10, 10, 0, -5); addRoad(10, 10, 10, 0, 8);
-}
-
-function generateTrack() {
-    track = [];
-    addStraight(ROAD.LENGTH.SHORT);
-    addCurve(ROAD.LENGTH.MEDIUM, ROAD.CURVE.EASY, ROAD.HILL.LOW);
-    addSCurves();
-    addCurve(ROAD.LENGTH.LONG, -ROAD.CURVE.MEDIUM, ROAD.HILL.NONE);
-    addStraight(ROAD.LENGTH.LONG);
-    addBumps();
-    addCurve(ROAD.LENGTH.LONG, ROAD.CURVE.HARD, ROAD.HILL.HIGH);
-    addCurve(ROAD.LENGTH.LONG, -ROAD.CURVE.HARD, -ROAD.HILL.HIGH);
-    addStraight(ROAD.LENGTH.MEDIUM);
-    addCurve(ROAD.LENGTH.MEDIUM, ROAD.CURVE.EASY, ROAD.HILL.LOW);
+    // Curva Intensa
+    addRoad(ROAD.LENGTH.LONG, ROAD.LENGTH.LONG, ROAD.LENGTH.LONG, -ROAD.CURVE.HARD, ROAD.HILL.HIGH);
+    addRoad(ROAD.LENGTH.MEDIUM, ROAD.LENGTH.MEDIUM, ROAD.LENGTH.MEDIUM, 0, -ROAD.HILL.HIGH);
+    addRoad(ROAD.LENGTH.LONG, ROAD.LENGTH.LONG, ROAD.LENGTH.LONG, ROAD.CURVE.MEDIUM, 0);
     
-    // Decoração e Checkpoints
     trackLength = track.length * SEGMENT_LENGTH;
     
-    // Adicionar Linha de Chegada
+    // Grid de Chegada
     for(let i = 0; i < 15; i++) track[i].color = 'finish';
     
-    // Sprites de Cenário
+    // Decoração (Árvores e Placas)
     for(let i = 20; i < track.length; i++) {
         if (i % 30 === 0) track[i].sprites.push({ type: 'billboard', offset: -1.5 });
         if (i % 15 === 0) track[i].sprites.push({ type: 'tree', offset: 1.5 + Math.random() });
@@ -274,11 +242,11 @@ function generateTrack() {
     }
 }
 
-// --- OPONENTES (BOTS) ---
+// --- BOTS (ADVERSÁRIOS) ---
 let bots = [];
 function spawnBots() {
     bots = [];
-    for(let i = 0; i < 19; i++) { // 19 bots + vc = 20
+    for(let i = 0; i < 19; i++) {
         bots.push({
             z: (i + 1) * (trackLength / 22),
             x: (Math.random() * 1.4) - 0.7,
@@ -290,25 +258,18 @@ function spawnBots() {
     }
 }
 
-// --- MECÂNICAS ---
+// --- FÍSICA E LOOP DURANTE A CORRIDA ---
 function activateNitro() {
     if (player.nitros > 0 && !player.nitroActive && gameState === 'racing') {
-        player.nitros--;
-        player.nitroActive = true;
-        player.nitroTimer = 4.0; // 4 segundos de nitro
+        player.nitros--; player.nitroActive = true; player.nitroTimer = 4.0; 
     }
 }
 
-// --- UPDATE LOOP ---
-function update(dt) {
-    if (gameState !== 'racing') return;
-    
+function updateRacing(dt) {
     raceTimer += dt;
-    
-    // Encontrar segmento atual
     let startSeg = track[Math.floor(player.z / SEGMENT_LENGTH) % track.length];
     
-    // Nitro Logic
+    // Motor
     let currentMaxSpeed = pStats.maxSpeed;
     if (player.nitroActive) {
         player.nitroTimer -= dt;
@@ -316,7 +277,6 @@ function update(dt) {
         if (player.nitroTimer <= 0) player.nitroActive = false;
     }
 
-    // Aceleração e Combustível
     if (player.fuel > 0) {
         if (keys.ArrowUp) {
             player.speed = Util.accelerate(player.speed, pStats.accel * (player.nitroActive ? 2 : 1), dt);
@@ -327,54 +287,51 @@ function update(dt) {
             player.speed = Util.accelerate(player.speed, -pStats.accel * 0.2, dt);
         }
     } else {
-        // Acabou a gasolina
         player.speed = Util.accelerate(player.speed, -pStats.accel * 0.5, dt);
-        currentMaxSpeed = 30; // Arrasta-se até o fim
+        currentMaxSpeed = 40; 
     }
 
-    // Penalidade fora da pista
     let offRoad = (Math.abs(player.x) > 1);
     if (offRoad && player.speed > 80) player.speed = Util.accelerate(player.speed, -pStats.accel * 2, dt);
     
     player.speed = Util.limit(player.speed, 0, currentMaxSpeed);
-    player.speedPercent = player.speed / pStats.maxSpeed; // Baseado no vel original para visual
+    player.speedPercent = player.speed / pStats.maxSpeed; 
     
-    // Movimento Z
     let dz = (player.speed * 18) * dt; 
-    let oldZ = player.z;
     player.z += dz;
     
-    // Sistema de Voltas
+    // Contagem de Voltas
     if (player.z >= trackLength) {
         player.z -= trackLength;
         currentLap++;
         if (currentLap > totalLaps) {
             gameState = 'finished';
             document.getElementById('endScreen').classList.remove('hidden');
-            document.getElementById('endPos').innerText = `POSITION: ${player.rank}${player.rank===1?'ST':player.rank===2?'ND':player.rank===3?'RD':'TH'}`;
+            let suf = player.rank === 1 ? 'ST' : player.rank === 2 ? 'ND' : player.rank === 3 ? 'RD' : 'TH';
+            document.getElementById('endPos').innerText = `POSITION: ${player.rank}${suf}`;
             document.getElementById('endTime').innerText = `TIME: ${Util.formatTime(raceTimer)}`;
             document.getElementById('inst').classList.add('hidden');
             return;
         }
     }
 
-    // Direção e Força Centrífuga
-    let steerRate = 2.5 * dt * (1 - (player.speedPercent * 0.4)); // Menos controle em alta velocidade
+    // Direção
+    let steerRate = 2.5 * dt * (1 - (player.speedPercent * 0.4)); 
     if (keys.ArrowLeft) { player.x -= steerRate; player.steerAngle = -1; }
     else if (keys.ArrowRight) { player.x += steerRate; player.steerAngle = 1; }
     else { player.steerAngle = 0; }
     
-    player.x -= (dz * startSeg.curve * 0.0003) * (2.5 / pStats.grip); // Centrífuga
+    // Força Centrífuga empurra você pra fora da curva
+    player.x -= (dz * startSeg.curve * 0.0003) * (2.5 / pStats.grip); 
     player.x = Util.limit(player.x, -2, 2);
 
-    // Efeito Visual de RPM
+    // Efeitos Visuais (RPM/Mundo)
     player.rpm = (player.speed / currentMaxSpeed) * 8000 + (Math.random()*200);
     if(player.rpm < 1000) player.rpm = 1000;
     player.gear = Math.max(1, Math.ceil((player.speed / pStats.maxSpeed) * 5));
-
     skyOffset = (skyOffset - (startSeg.curve * player.speedPercent * 0.005)) % 1;
 
-    // Atualiza Bots
+    // Atualiza Oponentes
     track.forEach(seg => seg.bots = []);
     let myRank = 1;
 
@@ -386,32 +343,57 @@ function update(dt) {
         let bSeg = track[Math.floor(bot.z / SEGMENT_LENGTH) % track.length];
         bSeg.bots.push(bot);
 
-        // IA Básica (Curvas)
+        // IA desvia da curva
         bot.x -= (bot.speed * 18 * dt * bSeg.curve * 0.0003);
-        
-        // Retorna pro centro/linha
         if (bot.x < bot.lane) bot.x += 0.02;
         if (bot.x > bot.lane) bot.x -= 0.02;
         bot.x = Util.limit(bot.x, -0.9, 0.9);
 
-        // Rank
+        // Ranking
         let relZ = bot.z - player.z;
         if (relZ < 0 && relZ > -trackLength/2) relZ += trackLength;
         if (relZ > 0 && relZ < trackLength/2) myRank++;
 
-        // Vácuo (Slipstream)
+        // Vácuo (Aumenta velocidade se atrás de um bot)
         if (relZ > 0 && relZ < 500 && Math.abs(bot.x - player.x) < 0.3) {
-            player.speed += 0.5; // Ganha velocidade extra
+            player.speed += 0.5; 
         }
 
-        // Colisão Player x Bot
+        // Bateu
         if (relZ > 0 && relZ < 200 && Math.abs(player.x - bot.x) < 0.4) {
-            player.speed = bot.speed - 20; // Bateu atrás, perde veloc
-            bot.speed += 20; // Empurra bot
+            player.speed = Math.max(0, bot.speed - 20); 
+            bot.speed += 20; 
         }
     });
 
     player.rank = myRank;
+}
+
+// Lógica Autônoma para o Menu (Deixa a pista correndo lindamente no fundo)
+function updateMenu(dt) {
+    player.speed = 150; 
+    player.speedPercent = player.speed / pStats.maxSpeed;
+    player.z += (player.speed * 18) * dt;
+    if (player.z >= trackLength) player.z -= trackLength;
+    player.x = 0; // Centraliza a câmera
+
+    let startSeg = track[Math.floor(player.z / SEGMENT_LENGTH) % track.length];
+    skyOffset = (skyOffset - (startSeg.curve * player.speedPercent * 0.005)) % 1;
+
+    track.forEach(seg => seg.bots = []);
+    bots.forEach(bot => {
+        bot.speed = bot.baseSpeed;
+        bot.z += (bot.speed * 18) * dt;
+        if (bot.z >= trackLength) bot.z -= trackLength;
+        
+        let bSeg = track[Math.floor(bot.z / SEGMENT_LENGTH) % track.length];
+        bSeg.bots.push(bot);
+
+        bot.x -= (bot.speed * 18 * dt * bSeg.curve * 0.0003);
+        if (bot.x < bot.lane) bot.x += 0.02;
+        if (bot.x > bot.lane) bot.x -= 0.02;
+        bot.x = Util.limit(bot.x, -0.9, 0.9);
+    });
 }
 
 // --- RENDERIZAÇÃO (GRÁFICOS 3D E 2D) ---
@@ -431,16 +413,13 @@ function drawPolygon(c, x1, y1, w1, x2, y2, w2) {
 }
 
 function render() {
-    if (gameState !== 'racing') return;
-
     // Fundo Clássico
     ctx.fillStyle = '#1e88e5'; ctx.fillRect(0, 0, W, H/2); // Céu
-    ctx.fillStyle = '#0a330a'; ctx.fillRect(0, H/2, W, H/2); // Chão base
+    ctx.fillStyle = '#0a330a'; ctx.fillRect(0, H/2, W, H/2); // Chão
 
     // Sol e Montanhas com Parallax
     ctx.fillStyle = '#ff9800'; 
     ctx.beginPath(); ctx.arc(W/2 + (skyOffset * W), H/2 - 50, 80, 0, Math.PI*2); ctx.fill();
-    
     ctx.fillStyle = '#0d47a1';
     for(let i= -2; i<4; i++) {
         let mx = (i*400) + (skyOffset * 800) % 400;
@@ -453,27 +432,23 @@ function render() {
     
     let dx = -(baseSegment.curve * basePercent);
     let x = 0, maxY = H;
-
     let renderList = [];
 
-    // PROJEÇÃO 3D DO CENÁRIO (PINTOR DE TRÁS PRA FRENTE)
+    // Motor de Projeção Pseudo-3D
     for(let n = 0; n < SEGMENTS_VISIBLE; n++) {
         let segment = track[(baseSegment.index + n) % track.length];
         let looped = segment.index < baseSegment.index;
-        segment.world = segment.world || {};
-        segment.world.y = segment.p1y; // A altura lida do construtor
         
         project(segment.p1, (player.x * ROAD_WIDTH) - x, playerY + cameraHeight, player.z - (looped ? trackLength : 0), cameraDepth, W, H, ROAD_WIDTH);
         project(segment.p2, (player.x * ROAD_WIDTH) - x - dx, playerY + cameraHeight, player.z - (looped ? trackLength : 0), cameraDepth, W, H, ROAD_WIDTH);
         
-        x += dx;
-        dx += segment.curve;
+        x += dx; dx += segment.curve;
 
-        // Clipping de colina
+        // Se estiver atrás da câmera ou atrás de uma colina, ignore!
         if ((segment.p1.camera.z <= cameraDepth) || (segment.p2.screen.y >= maxY)) continue;
         maxY = segment.p2.screen.y;
 
-        // Cores da Pista (Listras)
+        // Colorização
         let rGrass, rRumble, rRoad, rLane;
         if (segment.color === 'finish') {
             rGrass = '#111'; rRumble = '#fff'; rRoad = (n%2) ? '#fff' : '#000'; rLane = 'transparent';
@@ -485,7 +460,6 @@ function render() {
             rLane = dark ? '#fff' : 'transparent';
         }
 
-        // Renderiza Asfalto e Grama
         drawPolygon(rGrass, 0, segment.p1.screen.y, W, 0, segment.p2.screen.y, W);
         drawPolygon(rRumble, segment.p1.screen.x, segment.p1.screen.y, segment.p1.screen.w * 1.1, segment.p2.screen.x, segment.p2.screen.y, segment.p2.screen.w * 1.1);
         drawPolygon(rRoad, segment.p1.screen.x, segment.p1.screen.y, segment.p1.screen.w, segment.p2.screen.x, segment.p2.screen.y, segment.p2.screen.w);
@@ -495,34 +469,32 @@ function render() {
             drawPolygon(rLane, segment.p1.screen.x, segment.p1.screen.y, lw1, segment.p2.screen.x, segment.p2.screen.y, lw2);
         }
 
-        // Guarda bots e sprites para desenhar depois (para z-index correto)
+        // Acumula os objetos na pista para desenhar de trás pra frente
         segment.bots.forEach(bot => renderList.push({ type: 'bot', obj: bot, seg: segment }));
         segment.sprites.forEach(spr => renderList.push({ type: 'sprite', obj: spr, seg: segment }));
     }
 
-    // DESENHAR OBJETOS (De Trás pra Frente)
+    // Desenhar objetos em ordem
     for (let i = renderList.length - 1; i >= 0; i--) {
         let item = renderList[i];
         let scale = item.seg.p1.screen.scale;
         
         if (item.type === 'sprite') {
             let sprX = item.seg.p1.screen.x + (item.seg.p1.screen.w * item.obj.offset);
-            let sprY = item.seg.p1.screen.y;
-            drawRetroSprite(ctx, item.obj.type, sprX, sprY, scale);
-        } 
-        else if (item.type === 'bot') {
+            drawRetroSprite(ctx, item.obj.type, sprX, item.seg.p1.screen.y, scale);
+        } else if (item.type === 'bot') {
             let botX = item.seg.p1.screen.x + (item.seg.p1.screen.w * item.obj.x);
-            let botY = item.seg.p1.screen.y;
-            drawCar(ctx, botX, botY, scale, item.obj.color, false, 0);
+            drawCar(ctx, botX, item.seg.p1.screen.y, scale, item.obj.color, false, 0);
         }
     }
 
-    // DESENHAR JOGADOR
-    let pScale = cameraDepth / (cameraHeight * cameraDepth); // Fixo na tela
-    let pBounce = player.speed > 50 ? (Math.random()*4 - 2) : 0;
-    drawCar(ctx, W/2, H - 120 + pBounce, pScale * 2.5, pStats.color, true, player.steerAngle);
-
-    drawHUD();
+    // Só desenha o seu carro e o HUD se a corrida estiver valendo
+    if (gameState === 'racing') {
+        let pScale = cameraDepth / (cameraHeight * cameraDepth); 
+        let pBounce = player.speed > 50 ? (Math.random()*4 - 2) : 0;
+        drawCar(ctx, W/2, H - 120 + pBounce, pScale * 2.5, pStats.color, true, player.steerAngle);
+        drawHUD();
+    }
 }
 
 // --- ARTE EM CÓDIGO (SPRITES) ---
@@ -530,14 +502,14 @@ function drawRetroSprite(ctx, type, x, y, scale) {
     let w, h;
     if (type === 'tree') {
         w = 120 * scale * W/2; h = 280 * scale * H/2;
-        ctx.fillStyle = '#3e2723'; ctx.fillRect(x - w*0.1, y - h, w*0.2, h); // Tronco
-        ctx.fillStyle = '#1b5e20'; ctx.fillRect(x - w*0.4, y - h, w*0.8, h*0.6); // Copa Pixelada
-        ctx.fillStyle = '#2e7d32'; ctx.fillRect(x - w*0.2, y - h, w*0.6, h*0.3); // Luz
+        ctx.fillStyle = '#3e2723'; ctx.fillRect(x - w*0.1, y - h, w*0.2, h); 
+        ctx.fillStyle = '#1b5e20'; ctx.fillRect(x - w*0.4, y - h, w*0.8, h*0.6); 
+        ctx.fillStyle = '#2e7d32'; ctx.fillRect(x - w*0.2, y - h, w*0.6, h*0.3); 
     } else if (type === 'billboard') {
         w = 200 * scale * W/2; h = 200 * scale * H/2;
-        ctx.fillStyle = '#444'; ctx.fillRect(x - w*0.05, y - h, w*0.1, h); // Poste
-        ctx.fillStyle = '#e30000'; ctx.fillRect(x - w*0.5, y - h*1.1, w, h*0.5); // Placa
-        ctx.fillStyle = '#fff'; ctx.fillRect(x - w*0.4, y - h*1.0, w*0.8, h*0.3); // Logo
+        ctx.fillStyle = '#444'; ctx.fillRect(x - w*0.05, y - h, w*0.1, h); 
+        ctx.fillStyle = '#e30000'; ctx.fillRect(x - w*0.5, y - h*1.1, w, h*0.5); 
+        ctx.fillStyle = '#fff'; ctx.fillRect(x - w*0.4, y - h*1.0, w*0.8, h*0.3); 
     }
 }
 
@@ -546,39 +518,30 @@ function drawCar(ctx, x, y, scale, color, isPlayer, steer) {
     let h = 65 * scale * H/2;
     let tilt = steer * (w * 0.05);
 
-    // Sombra
-    ctx.fillStyle = 'rgba(0,0,0,0.6)';
-    ctx.fillRect(x - w*0.45 + tilt, y, w*0.9, h*0.3);
-
-    // Pneus
+    ctx.fillStyle = 'rgba(0,0,0,0.6)'; ctx.fillRect(x - w*0.45 + tilt, y, w*0.9, h*0.3);
     ctx.fillStyle = '#000';
     ctx.fillRect(x - w*0.45 + tilt, y - h*0.2, w*0.15, h*0.4);
     ctx.fillRect(x + w*0.3 + tilt, y - h*0.2, w*0.15, h*0.4);
 
-    // Chassi
     ctx.fillStyle = color;
     ctx.beginPath();
     ctx.moveTo(x - w*0.5 + tilt, y); ctx.lineTo(x + w*0.5 + tilt, y);
     ctx.lineTo(x + w*0.4, y - h*0.8); ctx.lineTo(x - w*0.4, y - h*0.8);
     ctx.fill();
     
-    // Lanternas Traseiras (Acendem se frear no player)
     let brake = isPlayer && keys.ArrowDown ? '#ffeb3b' : '#660000';
     ctx.fillStyle = brake;
     ctx.fillRect(x - w*0.45 + tilt, y - h*0.3, w*0.25, h*0.2);
     ctx.fillRect(x + w*0.2 + tilt, y - h*0.3, w*0.25, h*0.2);
 
-    // Aerofólio
     ctx.fillStyle = '#111';
-    ctx.fillRect(x - w*0.55 + tilt, y - h, w*1.1, h*0.15); // Lâmina
-    ctx.fillRect(x - w*0.3 + tilt, y - h, w*0.05, h*0.3); // Sup Esq
-    ctx.fillRect(x + w*0.25 + tilt, y - h, w*0.05, h*0.3); // Sup Dir
+    ctx.fillRect(x - w*0.55 + tilt, y - h, w*1.1, h*0.15); 
+    ctx.fillRect(x - w*0.3 + tilt, y - h, w*0.05, h*0.3); 
+    ctx.fillRect(x + w*0.25 + tilt, y - h, w*0.05, h*0.3); 
 
-    // Vidro
     ctx.fillStyle = '#000';
     ctx.fillRect(x - w*0.35, y - h*1.5, w*0.7, h*0.6);
 
-    // Fogo do Nitro!
     if (isPlayer && player.nitroActive) {
         ctx.fillStyle = Math.random() > 0.5 ? '#00ffff' : '#ffffff';
         ctx.beginPath();
@@ -588,71 +551,57 @@ function drawCar(ctx, x, y, scale, color, isPlayer, steer) {
     }
 }
 
-// --- HUD E INTERFACE ---
 function drawHUD() {
-    ctx.fillStyle = '#fff';
-    ctx.textAlign = 'left';
-    ctx.font = '24px "Press Start 2P"';
-    
-    // Top Left (Velocidade e Marcha)
+    ctx.fillStyle = '#fff'; ctx.textAlign = 'left'; ctx.font = '24px "Press Start 2P"';
     ctx.fillText(`SPEED ${Math.floor(player.speed)} KM/H`, 30, 50);
     ctx.fillStyle = player.speed > pStats.maxSpeed ? '#f00' : '#fff';
     ctx.fillText(`GEAR  ${player.gear}`, 30, 90);
 
-    // Top Right (Posição e Voltas)
-    ctx.fillStyle = '#ffeb3b';
-    ctx.textAlign = 'right';
+    ctx.fillStyle = '#ffeb3b'; ctx.textAlign = 'right';
     ctx.fillText(`POS ${player.rank}/20`, W - 30, 50);
     ctx.fillText(`LAP ${currentLap}/${totalLaps}`, W - 30, 90);
     ctx.fillText(`TIME ${Util.formatTime(raceTimer)}`, W - 30, 130);
 
-    // Radar / Minimapa (Loop visual básico no meio/topo)
+    // Mini Mapa
     let mapW = 200, mapH = 50, mapX = W/2 - mapW/2, mapY = 20;
     ctx.fillStyle = '#222'; ctx.fillRect(mapX, mapY, mapW, mapH);
     ctx.strokeStyle = '#555'; ctx.strokeRect(mapX, mapY, mapW, mapH);
-    
-    // Player e Bots no Radar
     let pMapX = mapX + ((player.z / trackLength) * mapW);
-    ctx.fillStyle = '#f00'; ctx.fillRect(pMapX - 2, mapY, 4, mapH); // Player trace
+    ctx.fillStyle = '#f00'; ctx.fillRect(pMapX - 2, mapY, 4, mapH); 
     bots.forEach(b => {
         let bMapX = mapX + ((b.z / trackLength) * mapW);
         ctx.fillStyle = '#0f0'; ctx.fillRect(bMapX - 1, mapY+10, 2, mapH-20);
     });
 
-    // Canto Inferior Direito: Conta-Giros (RPM) e Combustível
+    // Conta-Giros
     let gaugeX = W - 150, gaugeY = H - 150, r = 80;
     ctx.beginPath(); ctx.arc(gaugeX, gaugeY, r, Math.PI*0.8, Math.PI*2.2);
     ctx.lineWidth = 10; ctx.strokeStyle = '#333'; ctx.stroke();
-    
     let rpmRad = Util.interpolate(Math.PI*0.8, Math.PI*2.2, player.rpm / 9000);
     ctx.beginPath(); ctx.arc(gaugeX, gaugeY, r, Math.PI*0.8, rpmRad);
     ctx.strokeStyle = (player.rpm > 7500) ? '#f00' : '#0cf'; ctx.stroke();
-    
     ctx.fillStyle = '#fff'; ctx.textAlign = 'center'; ctx.font = '16px "Press Start 2P"';
-    ctx.fillText('RPM', gaugeX, gaugeY - 20);
-    ctx.fillText(`x1000`, gaugeX, gaugeY + 10);
+    ctx.fillText('RPM', gaugeX, gaugeY - 20); ctx.fillText(`x1000`, gaugeX, gaugeY + 10);
 
-    // Barra de Combustível
+    // Combustível
     ctx.fillStyle = '#333'; ctx.fillRect(W - 250, H - 40, 200, 20);
     ctx.fillStyle = player.fuel > 30 ? '#0f0' : '#f00'; 
-    ctx.fillRect(W - 250, H - 40, 200 * (player.fuel/100), 20);
+    let fuelP = Math.max(0, player.fuel) / 100;
+    ctx.fillRect(W - 250, H - 40, 200 * fuelP, 20);
     ctx.fillStyle = '#fff'; ctx.fillText('FUEL', W - 150, H - 50);
 
-    // Nitros
-    ctx.textAlign = 'left';
-    ctx.fillText('NITRO', 30, H - 80);
+    // Nitro
+    ctx.textAlign = 'left'; ctx.fillText('NITRO', 30, H - 80);
     for(let i=0; i<3; i++) {
         ctx.fillStyle = i < player.nitros ? '#f00' : '#333';
         ctx.fillRect(30 + (i*40), H - 60, 30, 30);
     }
 }
 
-// --- FLUXO DO JOGO ---
+// --- FLUXO PRINCIPAL ---
 function startGame() {
     document.getElementById('menuScreen').classList.add('hidden');
     document.getElementById('inst').classList.add('hidden');
-    
-    // Resetar estado
     player.x = 0; player.y = 0; player.z = 0; player.speed = 0; 
     player.fuel = 100; player.nitros = 3; player.nitroActive = false;
     currentLap = 1; raceTimer = 0;
@@ -660,27 +609,30 @@ function startGame() {
     generateTrack();
     spawnBots();
     gameState = 'racing';
-    lastTime = performance.now();
-    requestAnimationFrame(gameLoop);
 }
 
 let lastTime = 0;
 function gameLoop(time) {
-    if (gameState === 'menu') return;
     let dt = (time - lastTime) / 1000;
-    if (dt > 0.1) dt = 0.1; // Limite para lag
+    if (dt > 0.1) dt = 0.1; 
     lastTime = time;
 
-    update(dt);
-    render();
-
+    if (gameState === 'menu') {
+        updateMenu(dt); // Move o fundo enquanto você não clica em start!
+        render();
+    } else if (gameState === 'racing') {
+        updateRacing(dt);
+        render();
+    } else if (gameState === 'finished') {
+        render(); // Tela estática rodando
+    }
     requestAnimationFrame(gameLoop);
 }
 
-// --- INICIALIZAÇÃO VISUAL NO MENU ---
-// Apenas para mostrar o cenário estático no fundo do menu
+// START GLOBAL!
 generateTrack();
-render(); 
+spawnBots();
+requestAnimationFrame(gameLoop);
 
 </script>
 </body>
